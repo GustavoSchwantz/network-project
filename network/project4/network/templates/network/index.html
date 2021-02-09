@@ -3,11 +3,14 @@
 {% block body %}
     <h1>All Posts</h1>
 
-    <div id="new-post-view">
-        <h5>New Post</h5>
-        <form id="new-post-form">
-            <textarea class="form-control" id="new-post-content"></textarea>
-            <input type="submit" class="btn btn-primary" value="Post">
-        </form>
-    </div>
+    {% if user.is_authenticated %}
+        <div id="post-view">
+            <h5>New Post</h5>
+            <form>
+                <textarea class="form-control" id="content"></textarea>
+                <input class="btn btn-primary" id="submit" type="submit" value="Post">
+            </form>
+        </div>
+    {% endif %}
+
 {% endblock %}
