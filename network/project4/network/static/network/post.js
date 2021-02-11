@@ -11,7 +11,37 @@ document.addEventListener('DOMContentLoaded', function() {
     else {
         console.log('Não há nenhum usuário logado.');
     }
+
+    load_posts()
 });
+
+// Load a set of posts
+function load_posts() {
+    
+    // Get all posts and add them to the DOM
+    fetch('/posts')
+    .then(response => response.json())
+    .then(posts => {
+        // Print posts
+        console.log(posts);
+
+        posts.forEach(add_post);
+    });
+}
+
+function add_post(contents) {
+    
+    // Create new post
+    const post = document.createElement('div');
+    post.className = 'm-2 p-3 border';
+    post.innerHTML = `<h5><b>${contents.username}</b></h5>
+                      ${contents.content} <br>
+                      <span style="color:gray">${contents.timestamp}</span> <br>
+                      <button class="btn btn-primary">Like ${contents.likes}</button>`
+    
+    // Add post to DOM
+    document.querySelector('#posts').append(post);
+}
 
 // Write a new post for users who are signed in 
 function new_post() {
