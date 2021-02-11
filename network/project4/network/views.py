@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 
-from .models import User
+from .models import Post, User
 
 
 def index(request):
@@ -77,3 +77,10 @@ def new_post(request):
     print(type(post))
 
     return JsonResponse({"message": "Post sent successfully."}, status=201)
+
+
+@csrf_exempt
+def posts(request):
+    posts = Post.objects.all()
+    posts = posts.order_by("-timestamp").all()
+    return JsonResponse([post.serialize() for post in posts], safe=False)
