@@ -84,3 +84,9 @@ def posts(request):
     posts = Post.objects.all()
     posts = posts.order_by("-timestamp").all()
     return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
+def profile(request, username):
+    return render(request, "network/profile.html", {
+        "username": username
+    })

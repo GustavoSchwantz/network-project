@@ -31,10 +31,10 @@ function load_posts() {
 
 function add_post(contents) {
     
-    // Create new post
+    // Create new post 
     const post = document.createElement('div');
     post.className = 'm-2 p-3 border';
-    post.innerHTML = `<h5><b>${contents.username}</b></h5>
+    post.innerHTML = `<a style="color:black" href="/profile/${contents.username}"><h5><b>${contents.username}</b></h5></a>
                       ${contents.content} <br>
                       <span style="color:gray">${contents.timestamp}</span> <br>
                       <button class="btn btn-primary">Like ${contents.likes}</button>`
