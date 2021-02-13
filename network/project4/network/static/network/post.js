@@ -1,22 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Select the username list item
-    const user = document.querySelector('#user');
-    
-    // Enable write a new post just if the user is signed in
-    if (user) {
-        console.log('Há um usuário logado.');
-        new_post();
-    }
-    else {
-        console.log('Não há nenhum usuário logado.');
-    }
-
-    load_posts()
+    load_posts();
 });
+
+function profile_page(username) {
+    console.log(`This is the profile page of ${username}.`);
+}
 
 // Load a set of posts
 function load_posts() {
+
+    // Show the header for all the posts
+    document.querySelector('h1').innerHTML = 'All Posts';
+
+    // Hide textarea view and show posts view
+    document.querySelector('#textarea-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'block';
     
     // Get all posts and add them to the DOM
     fetch('/posts')
@@ -34,17 +32,24 @@ function add_post(contents) {
     // Create new post 
     const post = document.createElement('div');
     post.className = 'm-2 p-3 border';
-    post.innerHTML = `<a style="color:black" href="/profile/${contents.username}"><h5><b>${contents.username}</b></h5></a>
+    post.innerHTML = `<a style="color:black" href="javascript:void(0);" onclick="profile_page('${contents.username}');"><h5><b>${contents.username}</b></h5></a>
                       ${contents.content} <br>
                       <span style="color:gray">${contents.timestamp}</span> <br>
                       <button class="btn btn-primary">Like ${contents.likes}</button>`
     
     // Add post to DOM
-    document.querySelector('#posts').append(post);
+    document.querySelector('#posts-view').append(post);
 }
 
 // Write a new post for users who are signed in 
 function new_post() {
+
+    // Show the header for new post
+    document.querySelector('h1').innerHTML = 'New Post';
+
+    // Show textarea view and hide posts view
+    document.querySelector('#textarea-view').style.display = 'block';
+    document.querySelector('#posts-view').style.display = 'none';
     
     // Select the submit button and textarea to be used later
     const submit    = document.querySelector('#submit');
@@ -83,8 +88,8 @@ function new_post() {
         // Clear out textarea:
         newPost.value = '';
         
-        // Disable the submit button again:
-        submit.disabled = true;
+        // Go to all posts page after sent
+        load_posts();
         
         // Stop form from submitting
         return false;

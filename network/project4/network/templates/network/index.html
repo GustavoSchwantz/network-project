@@ -1,19 +1,18 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h1 class="ml-1">All Posts</h1>
 
-    {% if user.is_authenticated %}
-        <div class="m-2 p-3 border" id="post-view">
-            <h5><b>New Post</b></h5>
-            <form>
-                <textarea class="form-control" id="content"></textarea>
-                <input class="mt-1 btn btn-primary" id="submit" type="submit" value="Post">
-            </form>
-        </div>
-    {% endif %}
+    <h1 class="ml-1"></h1>
 
-    <div id="posts">
+    <div class="m-2 p-3 border" id="textarea-view">
+        <h5><b>What's happening?</b></h5>
+        <form>
+            <textarea class="form-control" id="content"></textarea>
+            <input class="mt-1 btn btn-primary" id="submit" type="submit" value="Post">
+        </form>
+    </div>
+
+    <div id="posts-view">
     </div>
 
 {% endblock %}
