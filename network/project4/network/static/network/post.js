@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    // By default, load the all posts page
     load_posts();
 });
 

@@ -9,7 +9,7 @@ class Post(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     content = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    likes = models.IntegerField()
+    likes = models.IntegerField(default=0)
 
     def serialize(self):
         return {

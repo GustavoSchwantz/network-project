@@ -70,18 +70,30 @@ def register(request):
 @login_required
 def new_post(request):
 
+    # Writing a new post must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    
+    # Get content of post
     data = json.loads(request.body)
-    post = data.get("post")
+    content = data.get("post", "")
 
-    print(post)
-    print(type(post))
+    # Create a post
+    post = Post(
+        user=request.user,
+        content=content
+    )
+    post.save()
 
     return JsonResponse({"message": "Post sent successfully."}, status=201)
 
 
-@csrf_exempt
 def posts(request):
+
+    # Get all posts
     posts = Post.objects.all()
+
+    # Return posts in reverse chronologial order
     posts = posts.order_by("-timestamp").all()
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
