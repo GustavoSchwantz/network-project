@@ -80,7 +80,7 @@ def new_post(request):
 
     # Create a post
     post = Post(
-        user=request.user,
+        username=request.user.username,
         content=content
     )
     post.save()
@@ -99,6 +99,24 @@ def posts(request):
 
 
 def profile(request, username):
-    return render(request, "network/profile.html", {
-        "username": username
-    })
+    
+    # Query for requested user
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found."}, status=404)
+    
+    # Get the number of people that the user follows, as well as the number of followers the user has
+    follows = user.follows.count()   
+    followers = user.followers.count() 
+
+    # Get all posts from that user and put them in reverse chronological order
+    posts = Post.objects.filter(username=username)
+    posts = posts.order_by("-timestamp").all()
+    
+    # Return all information in a JSON object
+    return JsonResponse({
+        "follows": follows,
+        "followers": followers,
+        "posts": [post.serialize() for post in posts]
+        }, status=201)    

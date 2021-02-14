@@ -5,7 +5,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function profile_page(username) {
-    console.log(`This is the profile page of ${username}.`);
+    
+    // Show the header for all the posts
+    document.querySelector('h1').innerHTML = `Profile Page of ${username}`;
+
+    // Hide textarea and posts views and show profile view
+    document.querySelector('#textarea-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'none';
+    document.querySelector('#profile-view').style.display = 'block';
+
+    
 }
 
 // Load a set of posts
@@ -14,9 +23,10 @@ function load_posts() {
     // Show the header for all the posts
     document.querySelector('h1').innerHTML = 'All Posts';
 
-    // Hide textarea view and show posts view
+    // Hide textarea and profile views and show posts view
     document.querySelector('#textarea-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#profile-view').style.display = 'none';
     
     // Get all posts and add them to the DOM
     fetch('/posts')
@@ -49,9 +59,10 @@ function new_post() {
     // Show the header for new post
     document.querySelector('h1').innerHTML = 'New Post';
 
-    // Show textarea view and hide posts view
+    // Show textarea view and hide posts and profile views
     document.querySelector('#textarea-view').style.display = 'block';
     document.querySelector('#posts-view').style.display = 'none';
+    document.querySelector('#profile-view').style.display = 'none';
     
     // Select the submit button and textarea to be used later
     const submit    = document.querySelector('#submit');
