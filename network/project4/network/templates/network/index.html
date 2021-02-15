@@ -13,10 +13,15 @@
         </form>
     </div>
 
-    <div id="posts-view">
+    <div class="m-2 p-3 border" id="profile-view">
+        <h4><b id="following">Following: 0</b></h4>
+        <h4><b id="followers">Followers: 0</b></h4>
+        {% if user.is_authenticated %}
+            <button class="btn btn-primary" id="follow-unfollow-button"></button>    
+        {% endif %}
     </div>
 
-    <div id="profile-view">
+    <div id="posts-view">
     </div>
 
 {% endblock %}

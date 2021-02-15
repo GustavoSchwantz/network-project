@@ -6,15 +6,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function profile_page(username) {
     
-    // Show the header for all the posts
+    // Show the header for profile page
     document.querySelector('h1').innerHTML = `Profile Page of ${username}`;
 
-    // Hide textarea and posts views and show profile view
+    // Hide textarea and show profile and posts views
     document.querySelector('#textarea-view').style.display = 'none';
-    document.querySelector('#posts-view').style.display = 'none';
     document.querySelector('#profile-view').style.display = 'block';
-
+    document.querySelector('#posts-view').style.display = 'block';
     
+    // Send a GET request to the 'profile/username' route to get the username profile information
+    fetch('profile/' + username)
+    .then(response => response.json())
+    .then(info => {
+        // Print info
+        console.log(info);
+        
+        // Set the following and followers numbers
+        document.querySelector('#following').innerHTML = `Following: ${info.follows}`;
+        document.querySelector('#followers').innerHTML = `Followers: ${info.followers}`;
+
+        const followUnfollowButton = document.querySelector('#follow-unfollow-button');
+        
+        // If there is follow/unfollow button in the DOM
+        if (followUnfollowButton) {
+            
+            // Show the appropriate button
+            followUnfollowButton.innerHTML = info.following ? 'Unfollow' : 'Follow';
+
+            // The follow/unfollow button should not appears to an user that acess her/his own profile
+            followUnfollowButton.style.display = info.other ? 'block' : 'none';
+            
+            // Use button to toggle whether or not following this user’s posts
+            followUnfollowButton.addEventListener('click', () => button_clicked(username, info.following));
+        }
+        
+        // Clear the posts view
+        document.querySelector('#posts-view').textContent = '';
+        
+        // Add username's posts to the DOM
+        info.posts.forEach(add_post);
+    });
+}
+
+// This function executes when the follow/unfollow button is clicked on
+function button_clicked(username, follow) {
+    fetch('profile/' + username, {
+        method: 'PUT',
+        body: JSON.stringify({
+            follow: follow
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+        
+        // Call function after change the server state for refresh profile information
+        profile_page(username);
+    }); 
 }
 
 // Load a set of posts
@@ -25,8 +74,8 @@ function load_posts() {
 
     // Hide textarea and profile views and show posts view
     document.querySelector('#textarea-view').style.display = 'none';
-    document.querySelector('#posts-view').style.display = 'block';
     document.querySelector('#profile-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'block';
     
     // Get all posts and add them to the DOM
     fetch('/posts')
@@ -35,6 +84,10 @@ function load_posts() {
         // Print posts
         console.log(posts);
 
+        // Clear the posts view
+        document.querySelector('#posts-view').textContent = '';
+        
+        // Add all posts to the DOM
         posts.forEach(add_post);
     });
 }

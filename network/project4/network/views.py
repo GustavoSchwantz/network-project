@@ -97,7 +97,7 @@ def posts(request):
     posts = posts.order_by("-timestamp").all()
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
-
+@csrf_exempt
 def profile(request, username):
     
     # Query for requested user
@@ -105,18 +105,40 @@ def profile(request, username):
         user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found."}, status=404)
-    
-    # Get the number of people that the user follows, as well as the number of followers the user has
-    follows = user.follows.count()   
-    followers = user.followers.count() 
 
-    # Get all posts from that user and put them in reverse chronological order
-    posts = Post.objects.filter(username=username)
-    posts = posts.order_by("-timestamp").all()
+    if request.method == "GET":
     
-    # Return all information in a JSON object
-    return JsonResponse({
-        "follows": follows,
-        "followers": followers,
-        "posts": [post.serialize() for post in posts]
-        }, status=201)    
+        # Get the number of people that the user follows, as well as the number of followers the user has
+        follows = user.follows.count()   
+        followers = user.followers.count() 
+        
+        # Verify if the current user is following the owner of the visited profile
+        following = user.followers.filter(username=request.user.username).exists()
+
+        # Get all posts from that user and put them in reverse chronological order
+        posts = Post.objects.filter(username=username)
+        posts = posts.order_by("-timestamp").all()
+    
+        # Return all information in a JSON object
+        return JsonResponse({
+            "follows": follows,
+            "followers": followers,
+            "following": following,
+            "other": request.user != user, # It tells if a user is acessing her/his own profile (if nobody is log in, request.user = AnonymousUser)
+            "posts": [post.serialize() for post in posts]
+            }, status=201)    
+    
+    # Update if current user whether or not they are following this user’s posts
+    elif request.method == "PUT":        
+        data = json.loads(request.body)
+        if not data.get("follow"):
+            request.user.follows.add(user)
+        else:
+            request.user.follows.remove(user)  
+        return JsonResponse({"message": "Changes added to the server."}, status=201) 
+    
+    # Profile must be via GET or PUT
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
