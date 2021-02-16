@@ -4,6 +4,31 @@ document.addEventListener('DOMContentLoaded', function() {
     load_posts();
 });
 
+function following_page() {
+
+    // Show the header for following page
+    document.querySelector('h1').innerHTML = 'Following';
+
+    // Hide textarea and profile views and show post view
+    document.querySelector('#textarea-view').style.display = 'none';
+    document.querySelector('#profile-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'block';
+
+    // Get all posts from the logged user and add them to the DOM
+    fetch('/following')
+    .then(response => response.json())
+    .then(posts => {
+        // Print posts
+        console.log(posts);
+
+        // Clear the posts view
+        document.querySelector('#posts-view').textContent = '';
+        
+        // Add all posts to the DOM
+        posts.forEach(add_post);
+    });
+}
+
 function profile_page(username) {
     
     // Show the header for profile page

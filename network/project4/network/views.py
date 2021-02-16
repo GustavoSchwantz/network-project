@@ -142,3 +142,23 @@ def profile(request, username):
         return JsonResponse({
             "error": "GET or PUT request required."
         }, status=400)
+
+
+@login_required
+def following(request):
+
+    # Get all users that the current user follows
+    users = request.user.follows.all()
+    
+    # Create an empty query set
+    posts = Post.objects.none()
+    
+    # For each username that the current user follows, get all posts
+    # from that username and add them into the posts query set
+    for username in [user.username for user in users]:
+        posts = posts | Post.objects.filter(username=username) 
+
+    # Return posts in reverse chronologial order
+    posts = posts.order_by("-timestamp").all()
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
