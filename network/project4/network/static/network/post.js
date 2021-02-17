@@ -1,8 +1,22 @@
+let allPagesCounter = 1;
+
 document.addEventListener('DOMContentLoaded', function() {
 
     // By default, load the all posts page
     load_posts();
 });
+
+function next_page(page) {
+
+    allPagesCounter++;
+    load_posts();
+}
+
+function previous_page(page) {
+
+    allPagesCounter--;
+    load_posts();
+}
 
 function following_page() {
 
@@ -32,7 +46,7 @@ function following_page() {
 function profile_page(username) {
     
     // Show the header for profile page
-    document.querySelector('h1').innerHTML = `Profile Page of ${username}`;
+    document.querySelector('h1').innerHTML = "Profile Page";
 
     // Hide textarea and show profile and posts views
     document.querySelector('#textarea-view').style.display = 'none';
@@ -102,8 +116,8 @@ function load_posts() {
     document.querySelector('#profile-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
     
-    // Get all posts and add them to the DOM
-    fetch('/posts')
+    // Get all posts from a page and add them to the DOM
+    fetch('/posts/' + allPagesCounter)
     .then(response => response.json())
     .then(posts => {
         // Print posts

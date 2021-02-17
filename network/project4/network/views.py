@@ -5,7 +5,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import json
+import json, math
+from django.core.paginator import Paginator
 
 from .models import Post, User
 
@@ -88,14 +89,26 @@ def new_post(request):
     return JsonResponse({"message": "Post sent successfully."}, status=201)
 
 
-def posts(request):
+def posts(request, page):
 
     # Get all posts
     posts = Post.objects.all()
+    
+    # The page number must exist
+    if 1 <= page <= math.ceil(posts.count() / 10):
 
-    # Return posts in reverse chronologial order
-    posts = posts.order_by("-timestamp").all()
-    return JsonResponse([post.serialize() for post in posts], safe=False)
+        # Put posts in reverse chronologial order
+        posts = posts.order_by("-timestamp").all()
+
+        # Creates a Paginator with 10 itens per page 
+        paginator = Paginator(posts, 10)
+    
+        # Get posts from a specific page
+        posts = paginator.page(page).object_list
+
+        return JsonResponse([post.serialize() for post in posts], safe=False)
+
+    return JsonResponse({"error": "Invalid page number."}, status=404)    
 
 @csrf_exempt
 def profile(request, username):
