@@ -93,25 +93,38 @@ def posts(request, page):
 
     # Get all posts
     posts = Post.objects.all()
+
+    # Put posts in reverse chronologial order
+    posts = posts.order_by("-timestamp").all()
+
+    # Creates a Paginator with 10 itens per page 
+    paginator = Paginator(posts, 10)
+
+    hasPrevious = True
+    hasNext     = True
     
-    # The page number must exist
-    if 1 <= page <= math.ceil(posts.count() / 10):
-
-        # Put posts in reverse chronologial order
-        posts = posts.order_by("-timestamp").all()
-
-        # Creates a Paginator with 10 itens per page 
-        paginator = Paginator(posts, 10)
+    # It is not possible acess a page smaller than 1
+    if page < 1:
+        page = 1
+        hasPrevious = False
     
-        # Get posts from a specific page
-        posts = paginator.page(page).object_list
+    # It is not possible acess a page bigger than the last page number
+    if page > math.ceil(posts.count() / 10):
+        page = math.ceil(posts.count() / 10)
+        hasNext = False
+    
+    # Get posts from a specific page
+    posts = paginator.page(page).object_list
 
-        return JsonResponse([post.serialize() for post in posts], safe=False)
-
-    return JsonResponse({"error": "Invalid page number."}, status=404)    
+    return JsonResponse({
+        "previous": hasPrevious,
+        "next": hasNext,
+        "posts": [post.serialize() for post in posts]}, 
+        safe=False)
+  
 
 @csrf_exempt
-def profile(request, username):
+def profile(request, username, page):
     
     # Query for requested user
     try:
@@ -131,6 +144,25 @@ def profile(request, username):
         # Get all posts from that user and put them in reverse chronological order
         posts = Post.objects.filter(username=username)
         posts = posts.order_by("-timestamp").all()
+
+        # Creates a Paginator with 10 itens per page 
+        paginator = Paginator(posts, 10)
+
+        hasPrevious = True
+        hasNext     = True
+    
+        # It is not possible acess a page smaller than 1
+        if page < 1:
+            page = 1
+            hasPrevious = False
+    
+        # It is not possible acess a page bigger than the last page number
+        if page > math.ceil(posts.count() / 10):
+            page = math.ceil(posts.count() / 10)
+            hasNext = False
+    
+        # Get posts from a specific page
+        posts = paginator.page(page).object_list
     
         # Return all information in a JSON object
         return JsonResponse({
@@ -138,6 +170,8 @@ def profile(request, username):
             "followers": followers,
             "following": following,
             "other": request.user != user, # It tells if a user is acessing her/his own profile (if nobody is log in, request.user = AnonymousUser)
+            "previous": hasPrevious,
+            "next": hasNext,
             "posts": [post.serialize() for post in posts]
             }, status=201)    
     

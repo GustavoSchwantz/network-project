@@ -8,14 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function next_page(page) {
 
-    allPagesCounter++;
-    load_posts();
+    if (page === 'All Posts') {
+        allPagesCounter++;
+        load_posts();
+    }
 }
 
 function previous_page(page) {
 
-    allPagesCounter--;
-    load_posts();
+    if (page === 'All Posts') {
+        allPagesCounter--;
+        load_posts();
+    }
 }
 
 function following_page() {
@@ -46,7 +50,7 @@ function following_page() {
 function profile_page(username) {
     
     // Show the header for profile page
-    document.querySelector('h1').innerHTML = "Profile Page";
+    document.querySelector('h1').innerHTML = 'Profile Page';
 
     // Hide textarea and show profile and posts views
     document.querySelector('#textarea-view').style.display = 'none';
@@ -111,23 +115,30 @@ function load_posts() {
     // Show the header for all the posts
     document.querySelector('h1').innerHTML = 'All Posts';
 
-    // Hide textarea and profile views and show posts view
+    // Hide textarea and profile views and show posts and pagination views
     document.querySelector('#textarea-view').style.display = 'none';
     document.querySelector('#profile-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#pagination-view').style.display = 'block';
     
     // Get all posts from a page and add them to the DOM
     fetch('/posts/' + allPagesCounter)
     .then(response => response.json())
-    .then(posts => {
-        // Print posts
-        console.log(posts);
+    .then(contents => {
+        // Print result
+        console.log(contents);
+        
+        // When user click on for a previous page which does not exist
+        if (!contents.previous) { allPagesCounter++; }
+        
+        // When user click on for a next page which does not exist
+        if (!contents.next) { allPagesCounter--; }
 
         // Clear the posts view
         document.querySelector('#posts-view').textContent = '';
         
-        // Add all posts to the DOM
-        posts.forEach(add_post);
+        // Add posts to the DOM
+        contents.posts.forEach(add_post);
     });
 }
 
