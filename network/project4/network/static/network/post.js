@@ -1,4 +1,6 @@
 let allPagesCounter = 1;
+let followingCounter = 1;
+let profileCounter = 1;
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -12,6 +14,14 @@ function next_page(page) {
         allPagesCounter++;
         load_posts();
     }
+    else if (page === 'Following') {
+        followingCounter++;
+        following_page();
+    }
+    else {
+        profileCounter++;
+        profile_page(page.slice(16));
+    }
 }
 
 function previous_page(page) {
@@ -20,6 +30,14 @@ function previous_page(page) {
         allPagesCounter--;
         load_posts();
     }
+    else if (page === 'Following') {
+        followingCounter--;
+        following_page();
+    }
+    else {
+        profileCounter--;
+        profile_page(page.slice(16));
+    }
 }
 
 function following_page() {
@@ -27,42 +45,56 @@ function following_page() {
     // Show the header for following page
     document.querySelector('h1').innerHTML = 'Following';
 
-    // Hide textarea and profile views and show post view
+    // Hide textarea and profile views and show post and pagination views
     document.querySelector('#textarea-view').style.display = 'none';
     document.querySelector('#profile-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#pagination-view').style.display = 'block';
 
     // Get all posts from the logged user and add them to the DOM
-    fetch('/following')
+    fetch('/following/' + followingCounter)
     .then(response => response.json())
-    .then(posts => {
-        // Print posts
-        console.log(posts);
+    .then(contents => {
+        // Print all content
+        console.log(contents);
+
+         // When user click on for a previous page which does not exist
+         if (!contents.previous) { followingCounter++; }
+        
+         // When user click on for a next page which does not exist
+         if (!contents.next) { followingCounter--; }
 
         // Clear the posts view
         document.querySelector('#posts-view').textContent = '';
         
         // Add all posts to the DOM
-        posts.forEach(add_post);
+        contents.posts.forEach(add_post);
     });
 }
 
 function profile_page(username) {
     
     // Show the header for profile page
-    document.querySelector('h1').innerHTML = 'Profile Page';
+    document.querySelector('h1').innerHTML = `Profile Page of ${username}`;
 
-    // Hide textarea and show profile and posts views
+    // Hide textarea and show profile, posts and pagination views
     document.querySelector('#textarea-view').style.display = 'none';
     document.querySelector('#profile-view').style.display = 'block';
     document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#pagination-view').style.display = 'block';
     
-    // Send a GET request to the 'profile/username' route to get the username profile information
-    fetch('profile/' + username)
+    // Send a GET request to the 'profile/username/profileCounter' route to get the username profile information
+    fetch('profile/' + username + '/' + profileCounter)
     .then(response => response.json())
     .then(info => {
         // Print info
         console.log(info);
+
+        // When user click on for a previous page which does not exist
+        if (!info.previous) { profileCounter++; }
+        
+        // When user click on for a next page which does not exist
+        if (!info.next) { profileCounter--; }
         
         // Set the following and followers numbers
         document.querySelector('#following').innerHTML = `Following: ${info.follows}`;
@@ -147,13 +179,27 @@ function add_post(contents) {
     // Create new post 
     const post = document.createElement('div');
     post.className = 'm-2 p-3 border';
-    post.innerHTML = `<a style="color:black" href="javascript:void(0);" onclick="profile_page('${contents.username}');"><h5><b>${contents.username}</b></h5></a>
-                      ${contents.content} <br>
-                      <span style="color:gray">${contents.timestamp}</span> <br>
-                      <button class="btn btn-primary">Like ${contents.likes}</button>`
+    post.innerHTML = `
+    <h5><b><a style="color:black" href="#" onclick="profile_page('${contents.username}');">${contents.username}</a></b></h5>
+    <div><a href="javascript:void(0);" onclick="edit_post(${contents.id}, '${contents.content}');">Edit</a></div>
+    <div id="post-${contents.id}">${contents.content}</div>
+    <div style="color:gray">${contents.timestamp}</div>
+    <button class="btn btn-primary">Like ${contents.likes}</button>`
     
     // Add post to DOM
     document.querySelector('#posts-view').append(post);
+}
+
+function edit_post(id, content) {
+
+    //console.log(id);
+    //console.log(content);
+    
+    document.querySelector(`#post-${id}`).innerHTML = `
+        <form>
+            <textarea>${content}</textarea>
+            <input type="submit">
+        </form>`
 }
 
 // Write a new post for users who are signed in 
@@ -162,10 +208,11 @@ function new_post() {
     // Show the header for new post
     document.querySelector('h1').innerHTML = 'New Post';
 
-    // Show textarea view and hide posts and profile views
+    // Show textarea view and hide posts, profile and pagination views
     document.querySelector('#textarea-view').style.display = 'block';
     document.querySelector('#posts-view').style.display = 'none';
     document.querySelector('#profile-view').style.display = 'none';
+    document.querySelector('#pagination-view').style.display = 'none';
     
     // Select the submit button and textarea to be used later
     const submit    = document.querySelector('#submit');

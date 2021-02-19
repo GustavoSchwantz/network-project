@@ -192,7 +192,7 @@ def profile(request, username, page):
 
 
 @login_required
-def following(request):
+def following(request, page):
 
     # Get all users that the current user follows
     users = request.user.follows.all()
@@ -205,7 +205,31 @@ def following(request):
     for username in [user.username for user in users]:
         posts = posts | Post.objects.filter(username=username) 
 
-    # Return posts in reverse chronologial order
+    # Put posts in reverse chronologial order
     posts = posts.order_by("-timestamp").all()
-    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+    # Creates a Paginator with 10 itens per page 
+    paginator = Paginator(posts, 10)
+
+    hasPrevious = True
+    hasNext     = True
+    
+    # It is not possible acess a page smaller than 1
+    if page < 1:
+        page = 1
+        hasPrevious = False
+    
+    # It is not possible acess a page bigger than the last page number
+    if page > math.ceil(posts.count() / 10):
+        page = math.ceil(posts.count() / 10)
+        hasNext = False
+    
+    # Get posts from a specific page
+    posts = paginator.page(page).object_list
+
+    return JsonResponse({
+        "previous": hasPrevious,
+        "next": hasNext,
+        "posts": [post.serialize() for post in posts]}, 
+        safe=False)
 
