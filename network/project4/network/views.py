@@ -90,6 +90,31 @@ def new_post(request):
 
 
 @csrf_exempt
+def like_post(request, post_id):
+
+    # Like/unlike a post must be via PUT
+    if request.method != "PUT":
+        return JsonResponse({"error": "PUT request required."}, status=400)
+
+    # Query for the post
+    try:
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found."}, status=404)    
+    
+    # Update whether a post is liked or unliked
+    data = json.loads(request.body)    
+
+    if data.get("like"):
+        post.likes = post.likes + 1
+    else:    
+        post.likes = post.likes - 1
+
+    post.save()    
+
+    return JsonResponse({"likes": post.likes}, status=201)
+
+@csrf_exempt
 @login_required
 def edit_post(request, post_id):
 

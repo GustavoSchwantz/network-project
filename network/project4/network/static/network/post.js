@@ -189,15 +189,55 @@ function add_post(contents) {
     <div><a id="edit-link-${contents.id}" href="javascript:void(0);" onclick="edit_post(${contents.id}, '${contents.content}');">Edit</a></div>
     <div id="post-${contents.id}">${contents.content}</div>
     <div style="color:gray">${contents.timestamp}</div>
-    <button class="btn btn-primary">Like ${contents.likes}</button>`
+    <div><b id="likes-${contents.id}">Likes: ${contents.likes}</b></div>
+    <button class="btn btn-primary" href="javascript:void(0);" onclick="like_post(${contents.id})">Like</button>
+    <button class="btn btn-primary" href="javascript:void(0);" onclick="unlike_post(${contents.id})">Unlike</button>`
     
-    // Tt is not possible for a user to edit another user’s posts
+    // It is not possible for a user to edit another user’s posts
     if (!user || user !== contents.username) {
         post.querySelector(`#edit-link-${contents.id}`).style.display = 'none';
     }
     
     // Add post to DOM 
     document.querySelector('#posts-view').append(post);
+}
+
+function like_post(id) {
+
+    fetch('/like/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            like: true 
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+    });
+    
+    // console.log(parseInt(document.querySelector(`#likes-${id}`).innerHTML.slice(7)) + 1);
+
+    likeElement = document.querySelector(`#likes-${id}`);
+    likeElement.innerHTML = `Likes: ${parseInt(likeElement.innerHTML.slice(7)) + 1}`;
+}
+
+function unlike_post(id) {
+
+    fetch('/like/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            like: false
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+    });
+
+    likeElement = document.querySelector(`#likes-${id}`);
+    likeElement.innerHTML = `Likes: ${parseInt(likeElement.innerHTML.slice(7)) + -1}`;
 }
 
 function edit_post(id, content) {
