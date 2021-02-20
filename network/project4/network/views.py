@@ -89,6 +89,33 @@ def new_post(request):
     return JsonResponse({"message": "Post sent successfully."}, status=201)
 
 
+@csrf_exempt
+@login_required
+def edit_post(request, post_id):
+
+    # Editing a post must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    
+    # Get content of post
+    data = json.loads(request.body)
+    content = data.get("post", "")
+
+    # Query for the post
+    try:
+        post = Post.objects.get(username=request.user.username, pk=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse(
+            {"error": "Post not found or you do not have permition to edit it."}, 
+            status=404)
+    
+    # Change the post content
+    post.content = content
+    post.save()
+
+    return JsonResponse({"message": "Post edited successfully."}, status=201)
+
+
 def posts(request, page):
 
     # Get all posts

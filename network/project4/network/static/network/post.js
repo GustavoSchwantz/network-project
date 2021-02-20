@@ -1,8 +1,13 @@
 let allPagesCounter = 1;
 let followingCounter = 1;
 let profileCounter = 1;
+let user;
 
 document.addEventListener('DOMContentLoaded', function() {
+    
+    username = document.querySelector('#username');
+
+    user = username ? username.innerHTML : null;
 
     // By default, load the all posts page
     load_posts();
@@ -181,25 +186,70 @@ function add_post(contents) {
     post.className = 'm-2 p-3 border';
     post.innerHTML = `
     <h5><b><a style="color:black" href="#" onclick="profile_page('${contents.username}');">${contents.username}</a></b></h5>
-    <div><a href="javascript:void(0);" onclick="edit_post(${contents.id}, '${contents.content}');">Edit</a></div>
+    <div><a id="edit-link-${contents.id}" href="javascript:void(0);" onclick="edit_post(${contents.id}, '${contents.content}');">Edit</a></div>
     <div id="post-${contents.id}">${contents.content}</div>
     <div style="color:gray">${contents.timestamp}</div>
     <button class="btn btn-primary">Like ${contents.likes}</button>`
+
+    //console.log(post.querySelector(`#edit-link-${contents.id}`));
+    console.log(user);
     
-    // Add post to DOM
+    // Add post to DOM 
     document.querySelector('#posts-view').append(post);
 }
 
 function edit_post(id, content) {
-
-    //console.log(id);
-    //console.log(content);
     
-    document.querySelector(`#post-${id}`).innerHTML = `
-        <form>
-            <textarea>${content}</textarea>
-            <input type="submit">
+    // Hide edit link after click on it
+    document.querySelector(`#edit-link-${id}`).style.display = 'none';
+    
+    // Select post element to be used later
+    postElement = document.querySelector(`#post-${id}`);
+
+    // Put a textarea inside the post to edit its content
+    postElement.innerHTML = `
+        <form id="edit-post-form">
+            <textarea id="edit-content">${content}</textarea>
+            <input class="btn btn-primary" id="edit-submit" type="submit" value="Save">
         </form>`
+
+    // Select textarea and submit button to be used later
+    const editedPost   = document.querySelector('#edit-content'); 
+    const submit    = document.querySelector('#edit-submit');
+    
+    // Listen for input to be typed into the textarea
+    editedPost.onkeyup = () => {
+        if (editedPost.value.length > 0) {
+            submit.disabled = false;
+        }
+        else {
+            submit.disabled = true;
+        }
+    }
+
+    // Listen for submission of form
+    document.querySelector('#edit-post-form').onsubmit = () => {
+        
+        // Find the edited post the user just submitted
+        const post = editedPost.value;
+        
+        // Send a POST request to the '/edit/id' route carrying the edited post content
+        fetch('/edit/' + `${id}`, {
+            method: 'POST',
+            body: JSON.stringify({post: post})
+        })
+        .then(response => response.json())
+        .then(result => {
+            // Print result
+            console.log(result);
+        });
+        
+        // Change post content
+        postElement.innerHTML = post;
+        
+        // Stop form from submitting
+        return false;
+    }
 }
 
 // Write a new post for users who are signed in 
