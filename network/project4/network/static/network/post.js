@@ -190,9 +190,11 @@ function add_post(contents) {
     <div id="post-${contents.id}">${contents.content}</div>
     <div style="color:gray">${contents.timestamp}</div>
     <button class="btn btn-primary">Like ${contents.likes}</button>`
-
-    //console.log(post.querySelector(`#edit-link-${contents.id}`));
-    console.log(user);
+    
+    // Tt is not possible for a user to edit another user’s posts
+    if (!user || user !== contents.username) {
+        post.querySelector(`#edit-link-${contents.id}`).style.display = 'none';
+    }
     
     // Add post to DOM 
     document.querySelector('#posts-view').append(post);
