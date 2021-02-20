@@ -307,8 +307,8 @@ function new_post() {
     document.querySelector('#pagination-view').style.display = 'none';
     
     // Select the submit button and textarea to be used later
-    const submit    = document.querySelector('#submit');
-    const newPost   = document.querySelector('#content');
+    const submit    = document.querySelector('#post-submit');
+    const newPost   = document.querySelector('#new-content');
     
     // Disable submit button by default:
     submit.disabled = true;
@@ -324,7 +324,7 @@ function new_post() {
     }
     
     // Listen for submission of form
-    document.querySelector('form').onsubmit = () => {
+    document.querySelector('#new-post-form').onsubmit = () => {
         
         // Find the post the user just submitted
         const post = newPost.value;
